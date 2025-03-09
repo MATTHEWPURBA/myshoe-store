@@ -7,6 +7,7 @@ import { useAsync } from '../hooks/useAsync';
 import ShoeCard from '../components/shoe/ShoeCard';
 import Button from '../components/common/Button';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import useImagePreloader from '../hooks/useImagePreloader';
 
 const HomePage: React.FC = () => {
   const {
@@ -27,6 +28,13 @@ const HomePage: React.FC = () => {
     execute(fetchFeaturedShoes);
   }, [execute]);
   
+
+    // Preload featured shoe images when data is available
+    const featuredImageUrls = featuredShoes?.map(shoe => shoe.imageUrl || '') || [];
+    useImagePreloader(featuredImageUrls, { priority: 'high', width: 400, height: 300 });
+  
+
+
   return (
     <div>
       {/* Hero Section */}

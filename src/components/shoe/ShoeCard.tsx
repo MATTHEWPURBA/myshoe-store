@@ -5,6 +5,7 @@ import { Shoe } from '../../types';
 import { useCart } from '../../hooks/useCart';
 import { config } from '../../config';
 import Button from '../common/Button';
+import LazyImage from '../common/LazyImage';
 
 interface ShoeCardProps {
   shoe: Shoe;
@@ -21,8 +22,20 @@ const ShoeCard: React.FC<ShoeCardProps> = ({ shoe }) => {
     <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:shadow-lg hover:-translate-y-1">
       <Link to={`/shoes/${shoe.id}`}>
         <div className="h-48 overflow-hidden">
-          {shoe.imageUrl ? (
-            <img src={shoe.imageUrl.startsWith('http') ? shoe.imageUrl : `${config.imageBaseUrl}/${shoe.imageUrl}`} alt={shoe.name} className="w-full h-full object-cover" />
+          {shoe.imageUrl ? 
+          (
+
+            // <img src={shoe.imageUrl.startsWith('http') ? shoe.imageUrl : `${config.imageBaseUrl}/${shoe.imageUrl}`} 
+            // alt={shoe.name} 
+            // className="w-full h-full object-cover" />
+            <LazyImage 
+            src={shoe.imageUrl || ''} 
+            alt={shoe.name} 
+            className="w-full h-full" 
+            width={400}
+            height={300}
+            placeholderType="shoe"
+          />
           ) : (
             <div className="h-full bg-gray-200 flex items-center justify-center">
               <span className="text-gray-400">No Image</span>
