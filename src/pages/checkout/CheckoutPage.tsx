@@ -73,15 +73,26 @@ const CheckoutPage: React.FC = () => {
       error('Your cart is empty');
       return;
     }
+
+      // Make sure user is authenticated
+    if (!user || !user.id) {
+      error('You must be logged in to place an order');
+      navigate('/login');
+      return;
+    }
     
     try {
       setIsSubmitting(true);
       
-      // Create the order
-      const order = await orderApi.createOrder(cart.items);
+      // Calculate the final total including shipping
+      const finalTotal = cart.total + (formData.shippingMethod === 'express' ? 15 : 0);
+      
+      // Create the order with user ID and total
+      const order = await orderApi.createOrder(cart.items, user.id, finalTotal);
       
       // Clear the cart after successful order
       clearCart();
+
       
       // Show success message
       success('Order placed successfully!');

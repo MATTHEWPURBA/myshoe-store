@@ -13,8 +13,10 @@ export const orderApi = {
     return response.data;
   },
 
-  createOrder: async (cartItems: CartItem[]): Promise<Order> => {
+  createOrder: async (cartItems: CartItem[],userId: number, totalAmount: number): Promise<Order> => {
     const orderData = {
+      userId: userId,
+      total: totalAmount,
       items: cartItems.map(item => ({
         shoeId: item.shoe.id,
         quantity: item.quantity,

@@ -15,7 +15,7 @@ const ShoeDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const { addToCart } = useCart();
+  const { addToCart,cart } = useCart();
   const { success, error: showError } = useToast();
   
   const [shoe, setShoe] = useState<Shoe | null>(null);
@@ -52,6 +52,15 @@ const ShoeDetailsPage: React.FC = () => {
   
   const handleAddToCart = () => {
     if (shoe) {
+      // Check current quantity in cart
+      const currentInCart = cart.items.find(item => item.shoe.id === shoe.id)?.quantity || 0;
+      
+      // Check if adding the selected quantity would exceed stock
+      if (currentInCart + quantity > shoe.stock) {
+        showError(`Cannot add ${quantity} more. Only ${shoe.stock - currentInCart} more available in stock.`);
+        return;
+      }
+      
       addToCart(shoe, quantity);
       success(`Added ${quantity} ${shoe.name} to cart`);
     }
@@ -92,6 +101,10 @@ const ShoeDetailsPage: React.FC = () => {
       </div>
     );
   }
+
+  // Calculate available stock considering what's already in cart
+  const currentInCart = cart.items.find(item => item.shoe.id === shoe.id)?.quantity || 0;
+  const availableStock = shoe.stock - currentInCart;
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -132,6 +145,17 @@ const ShoeDetailsPage: React.FC = () => {
           </div>
         </div>
         
+        {currentInCart > 0 && (
+          <div className="bg-blue-50 p-3 rounded-md mb-4">
+            <p className="text-blue-700">
+              {currentInCart} of this item already in your cart.
+              {availableStock > 0 ? 
+                ` You can add ${availableStock} more.` : 
+                ' No more stock available.'}
+            </p>
+          </div>
+        )}
+        
         {shoe.description && (
           <div className="mb-6">
             <h2 className="text-lg font-medium mb-2">Description</h2>
@@ -146,10 +170,11 @@ const ShoeDetailsPage: React.FC = () => {
               <input
                 type="number"
                 min="1"
-                max={shoe.stock}
+                max={Math.min(shoe.stock, availableStock > 0 ? availableStock : shoe.stock)}
                 value={quantity}
                 onChange={handleQuantityChange}
                 className="w-16 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={availableStock <= 0}
               />
             </div>
             
@@ -157,8 +182,9 @@ const ShoeDetailsPage: React.FC = () => {
               variant="primary"
               onClick={handleAddToCart}
               fullWidth
+              disabled={availableStock <= 0}
             >
-              Add to Cart
+              {availableStock > 0 ? 'Add to Cart' : 'Maximum Stock Reached'}
             </Button>
           </div>
         ) : (
