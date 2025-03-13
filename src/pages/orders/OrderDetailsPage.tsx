@@ -33,11 +33,12 @@ const OrderDetailsPage: React.FC = () => {
 
         // Fetch shoe details for each item
         const shoePromises = orderData.items.map((item) => shoeApi.getShoeById(item.shoeId));
-
         const shoeResults = await Promise.allSettled(shoePromises);
-
         const shoeMap: { [key: number]: Shoe } = {};
-        shoeResults.forEach((result, index) => {
+        shoeResults.forEach((result,_) => 
+
+        // index ini ada di sebelah kanan, result ada di sebelah kiri
+        {
           if (result.status === 'fulfilled') {
             const shoe = result.value;
             shoeMap[shoe.id] = shoe;
@@ -45,6 +46,7 @@ const OrderDetailsPage: React.FC = () => {
         });
 
         setShoes(shoeMap);
+        
       } catch (err: any) {
         setError(err.message || 'Failed to load order details');
         showError(err.message || 'Failed to load order details');

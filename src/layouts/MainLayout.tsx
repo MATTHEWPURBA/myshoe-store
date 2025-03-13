@@ -10,7 +10,10 @@ const MainLayout: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
+      {/* Fixed position navbar */}
+      <div className="fixed top-0 left-0 right-0 z-10">
+        <Navbar />
+      </div>
       
       {/* Toast notifications */}
       <div className="fixed top-4 right-4 z-50 space-y-2">
@@ -38,7 +41,8 @@ const MainLayout: React.FC = () => {
         ))}
       </div>
       
-      <main className="flex-grow">
+      {/* Add padding to the top of the main content to prevent it from being hidden behind the fixed navbar */}
+      <main className="flex-grow pt-20"> {/* Increased padding-top from pt-16 to pt-20 for more space */}
         <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <Outlet />
         </div>

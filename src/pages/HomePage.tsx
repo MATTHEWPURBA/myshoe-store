@@ -36,7 +36,8 @@ const HomePage: React.FC = () => {
 
 
   return (
-    <div>
+// Added pt-4 to add a bit more spacing at the top of the page
+  <div className="pt-4">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg p-8 mb-12">
         <div className="max-w-2xl mx-auto text-center">
