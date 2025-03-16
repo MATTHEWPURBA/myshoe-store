@@ -11,7 +11,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 const OrdersPage: React.FC = () => {
   const { data: orders, isLoading, error, execute } = useAsync<Order[]>();
   const { error: showError } = useToast();
-  
+
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -20,10 +20,10 @@ const OrdersPage: React.FC = () => {
         showError(err.message || 'Failed to load orders');
       }
     };
-    
+
     fetchOrders();
   }, [execute, showError]);
-  
+
   const getStatusColor = (status: OrderStatus): string => {
     switch (status) {
       case OrderStatus.PAID:
@@ -42,7 +42,7 @@ const OrdersPage: React.FC = () => {
         return 'bg-gray-100 text-gray-800';
     }
   };
-  
+
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('en-US', {
@@ -51,7 +51,7 @@ const OrdersPage: React.FC = () => {
       day: 'numeric',
     }).format(date);
   };
-  
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -59,7 +59,7 @@ const OrdersPage: React.FC = () => {
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div className="bg-red-50 p-4 rounded-md text-red-700 text-center">
@@ -68,26 +68,23 @@ const OrdersPage: React.FC = () => {
       </div>
     );
   }
-  
+
   if (!orders || orders.length === 0) {
     return (
       <div className="text-center py-12">
         <h1 className="text-2xl font-bold mb-4">My Orders</h1>
         <p className="text-gray-500 mb-6">You haven't placed any orders yet.</p>
-        <Link
-          to="/shoes"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
+        <Link to="/shoes" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
           Browse Shoes
         </Link>
       </div>
     );
   }
-  
+
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">My Orders</h1>
-      
+
       <div className="space-y-6">
         {orders.map((order) => (
           <Card key={order.id}>
@@ -98,24 +95,15 @@ const OrdersPage: React.FC = () => {
                 </p>
                 <p className="font-medium">${order.total.toFixed(2)}</p>
               </div>
-              
+
               <div className="mt-2 md:mt-0 flex items-center">
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                    order.status
-                  )}`}
-                >
-                  {order.status}
-                </span>
-                <Link
-                  to={`/orders/${order.id}`}
-                  className="ml-4 text-blue-600 hover:text-blue-800 text-sm font-medium"
-                >
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>{order.status}</span>
+                <Link to={`/orders/${order.id}`} className="ml-4 text-blue-600 hover:text-blue-800 text-sm font-medium">
                   View Details
                 </Link>
               </div>
             </div>
-            
+
             <div className="border-t border-gray-200 pt-4">
               <h3 className="text-sm font-medium mb-2">Items</h3>
               <ul className="space-y-2">

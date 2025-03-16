@@ -28,7 +28,15 @@ export const orderApi = {
   },
 
   updateOrderStatus: async (id: number, status: string): Promise<Order> => {
-    const response = await api.put(`/orders/${id}/status`, { status });
+    const response = await api.patch(`/orders/${id}/status`, { status });
     return response.data;
-  }
+  },
+
+
+    // New method to delete an order
+    deleteOrder: async (id: number): Promise<void> => {
+      await api.delete(`/orders/${id}`);
+    }
+
+
 };

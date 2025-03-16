@@ -11,6 +11,9 @@ interface CartContextType {
   itemCount: number;
 }
 
+// Initial cart state
+const initialCartState: Cart = { items: [], total: 0 };
+
 export const CartContext = createContext<CartContextType>({
   cart: { items: [], total: 0 },
   addToCart: () => {},
@@ -27,53 +30,57 @@ interface CartProviderProps {
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cart, setCart] = useState<Cart>({ items: [], total: 0 });
   const [itemCount, setItemCount] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Load cart from localStorage on initial render
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
+    const loadCartFromLocalStorage = () => {
       try {
-        const parsedCart = JSON.parse(savedCart);
-        setCart(parsedCart);
-        
-        // Calculate item count
-        const count = parsedCart.items.reduce(
-          (total: number, item: CartItem) => total + item.quantity,
-          0
-        );
-        setItemCount(count);
+        const savedCart = localStorage.getItem('cart');
+        if (savedCart) {
+          const parsedCart = JSON.parse(savedCart);
+          setCart(parsedCart);
+
+          // Ensure the parsed cart has the expected structure
+          if (parsedCart && parsedCart.items && Array.isArray(parsedCart.items)) {
+            setCart(parsedCart);
+
+            // Calculate and set item count immediately from the loaded cart
+            const count = parsedCart.items.reduce((total: number, item: CartItem) => total + item.quantity, 0);
+            setItemCount(count);
+          }
+        }
       } catch (error) {
         console.error('Failed to parse cart from localStorage', error);
         localStorage.removeItem('cart');
+      } finally {
+        setIsInitialized(true);
       }
-    }
-  }, []);
+    };
+
+    loadCartFromLocalStorage();
+  }, []); // Empty dependency array ensures this only runs once
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-    
-    // Update item count
-    const count = cart.items.reduce(
-      (total, item) => total + item.quantity,
-      0
-    );
-    setItemCount(count);
-  }, [cart]);
+    // Only save to localStorage if the component has been initialized
+    // This prevents overwriting the localStorage with empty state during initial mount
+    if(isInitialized){
+      localStorage.setItem('cart', JSON.stringify(cart));
+      // Update item count whenever cart changes
+      const count = cart.items.reduce((total, item) => total + item.quantity, 0);
+      setItemCount(count);
+    }
+  }, [cart,isInitialized]);
 
   const calculateTotal = (items: CartItem[]): number => {
-    return items.reduce(
-      (sum, item) => sum + item.shoe.price * item.quantity,
-      0
-    );
+    return items.reduce((sum, item) => sum + item.shoe.price * item.quantity, 0);
   };
 
   const addToCart = (shoe: Shoe, quantity: number) => {
     setCart((prevCart) => {
       // Check if the item is already in the cart
-      const existingItemIndex = prevCart.items.findIndex(
-        (item) => item.shoe.id === shoe.id
-      );
+      const existingItemIndex = prevCart.items.findIndex((item) => item.shoe.id === shoe.id);
 
       let newItems;
 
@@ -113,9 +120,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
 
     setCart((prevCart) => {
-      const newItems = prevCart.items.map((item) =>
-        item.shoe.id === shoeId ? { ...item, quantity } : item
-      );
+      const newItems = prevCart.items.map((item) => (item.shoe.id === shoeId ? { ...item, quantity } : item));
       return {
         items: newItems,
         total: calculateTotal(newItems),

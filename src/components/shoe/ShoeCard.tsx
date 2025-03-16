@@ -1,8 +1,9 @@
 // src/components/shoe/ShoeCard.tsx
 import React, { useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Add useNavigate
 import { Shoe } from '../../types';
 import { useCart } from '../../hooks/useCart';
+import { useAuth } from '../../hooks/useAuth'; // Add useAuth hook
 import { useToast } from '../../hooks/useToast';
 // import { config } from '../../config';
 import Button from '../common/Button';
@@ -13,29 +14,31 @@ interface ShoeCardProps {
 }
 
 const ShoeCard: React.FC<ShoeCardProps> = ({ shoe }) => {
-  const { addToCart,cart } = useCart();
+  const { addToCart, cart } = useCart();
   const { error: showError } = useToast();
-
+  const { isAuthenticated } = useAuth(); // Get authentication status
+  const navigate = useNavigate(); // For redirection
 
   const handleAddToCart = useCallback(() => {
-      // Find current quantity in cart (using shoe.id to ensure proper match)
-      const currentItem = cart.items.find(item => item.shoe.id === shoe.id);
-      const currentInCart = currentItem?.quantity || 0;
-      
-      console.log('Current in cart:', currentInCart);
-      console.log('Available stock:', shoe.stock);
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      // Redirect to login page, passing current location as state
+      navigate('/login', { state: { from: { pathname: `/shoes/${shoe.id}` } } });
+      return;
+    }
 
-      
-
-      // Check if adding one more would exceed stock
-      if (currentInCart + 1 > shoe.stock) {
-        console.log('Stock limit reached!');
-        showError(`Cannot add more. Only ${shoe.stock} items available in stock (${currentInCart} already in cart).`);
-        return;
-      }
-
-      console.log('Adding item to cart...');
-
+    // Find current quantity in cart (using shoe.id to ensure proper match)
+    const currentItem = cart.items.find((item) => item.shoe.id === shoe.id);
+    const currentInCart = currentItem?.quantity || 0;
+    console.log('Current in cart:', currentInCart);
+    console.log('Available stock:', shoe.stock);
+    // Check if adding one more would exceed stock
+    if (currentInCart + 1 > shoe.stock) {
+      console.log('Stock limit reached!');
+      showError(`Cannot add more. Only ${shoe.stock} items available in stock (${currentInCart} already in cart).`);
+      return;
+    }
+    console.log('Adding item to cart...');
     addToCart(shoe, 1);
   }, [addToCart, cart.items, shoe, showError]);
 

@@ -9,11 +9,14 @@ import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { config } from '../../config';
+import { useNavigate } from 'react-router-dom';
+
 
 const OrderDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { error: showError, success } = useToast();
-
+  // Add this to your imports at the top
+  const navigate = useNavigate();
   const [order, setOrder] = useState<Order | null>(null);
   const [shoes, setShoes] = useState<{ [key: number]: Shoe }>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -35,18 +38,17 @@ const OrderDetailsPage: React.FC = () => {
         const shoePromises = orderData.items.map((item) => shoeApi.getShoeById(item.shoeId));
         const shoeResults = await Promise.allSettled(shoePromises);
         const shoeMap: { [key: number]: Shoe } = {};
-        shoeResults.forEach((result,_) => 
-
-        // index ini ada di sebelah kanan, result ada di sebelah kiri
-        {
-          if (result.status === 'fulfilled') {
-            const shoe = result.value;
-            shoeMap[shoe.id] = shoe;
+        shoeResults.forEach((result, _) =>
+          // index ini ada di sebelah kanan, result ada di sebelah kiri
+          {
+            if (result.status === 'fulfilled') {
+              const shoe = result.value;
+              shoeMap[shoe.id] = shoe;
+            }
           }
-        });
+        );
 
         setShoes(shoeMap);
-        
       } catch (err: any) {
         setError(err.message || 'Failed to load order details');
         showError(err.message || 'Failed to load order details');
@@ -58,26 +60,39 @@ const OrderDetailsPage: React.FC = () => {
     fetchOrderDetails();
   }, [id, showError]);
 
+
   const handleCancelOrder = async () => {
+
+
     if (!order || !window.confirm('Are you sure you want to cancel this order?')) {
       return;
     }
 
     try {
+
       setIsUpdating(true);
-      await orderApi.updateOrderStatus(order.id, OrderStatus.CANCELLED);
+      await orderApi.deleteOrder(order.id);
       success('Order cancelled successfully');
 
+      // Navigate back to the orders page
+      navigate('/orders');
+
       // Update local state
-      setOrder({
-        ...order,
-        status: OrderStatus.CANCELLED,
-      });
-    } catch (err: any) {
+      // setOrder({
+      //   ...order,
+      //   status: OrderStatus.CANCELLED,
+      // });
+
+    } 
+    
+    catch (err: any) {
       showError(err.message || 'Failed to cancel order');
-    } finally {
+    } 
+
+    finally {
       setIsUpdating(false);
     }
+
   };
 
   const getStatusColor = (status: OrderStatus): string => {
@@ -212,13 +227,15 @@ const OrderDetailsPage: React.FC = () => {
               </p>
             </div>
 
-            {order.status === OrderStatus.PENDING && (
+            {order.status === OrderStatus.PENDING && 
+            (
               <div className="mt-6">
                 <Button variant="danger" fullWidth onClick={handleCancelOrder} isLoading={isUpdating} disabled={isUpdating}>
                   Cancel Order
                 </Button>
               </div>
-            )}
+            )
+            }
 
             <div className="mt-4">
               <Link to="/orders">
