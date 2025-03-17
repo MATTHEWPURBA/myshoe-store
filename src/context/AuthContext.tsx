@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           localStorage.removeItem('user');
         }
       }
-      
+
       setIsLoading(false);
     };
 
@@ -57,7 +57,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       setError(null);
       const authData: AuthUser = await authApi.login(credentials);
-      
+
       localStorage.setItem('token', authData.token);
       localStorage.setItem('user', JSON.stringify(authData.user));
       setUser(authData.user);
@@ -74,7 +74,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       setError(null);
       const authData: AuthUser = await authApi.register(userData);
-      
+
       localStorage.setItem('token', authData.token);
       localStorage.setItem('user', JSON.stringify(authData.user));
       setUser(authData.user);
@@ -86,9 +86,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Update the logout function:
   const logout = () => {
-    authApi.logout();
-    setUser(null);
+    try {
+      // Attempt to clear cart on server before logging out
+      authApi.logout();
+      
+      // Then clear local storage
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('cart'); // Also clear cart from localStorage
+      
+      // Update user state
+      setUser(null);
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   return (
