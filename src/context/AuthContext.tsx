@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isAuthResolved: boolean; // New state to indicate auth resolution
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (userData: RegisterCredentials) => Promise<void>;
   logout: () => void;
@@ -17,6 +18,7 @@ export const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
   isLoading: true,
+  isAuthResolved: false, // Add to default context
   login: async () => {},
   register: async () => {},
   logout: () => {},
@@ -30,25 +32,43 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthResolved, setIsAuthResolved] = useState(false); // Add new state
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem('token');
-      const storedUser = localStorage.getItem('user');
+      try {
+        const token = localStorage.getItem('token');
+        const storedUser = localStorage.getItem('user');
 
-      if (token && storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-        } catch (err) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+        if (token && storedUser) {
+          try {
+            // Set the user from localStorage
+            setUser(JSON.parse(storedUser));
+
+            // Option: You could validate the token here with a lightweight API call
+            // to ensure it's still valid on the server
+            // await authApi.validateToken();
+          } catch (err) {
+            // Clear invalid data
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setUser(null);
+          }
+        } else {
+          // Ensure user is set to null if no token
+          setUser(null);
         }
+      } catch (err) {
+        console.error('Auth initialization error:', err);
+        // Ensure user is null on error
+        setUser(null);
+      } finally {
+        // Auth is now resolved regardless of the outcome
+        setIsLoading(false);
+        setIsAuthResolved(true);
       }
-
-      setIsLoading(false);
     };
-
     initAuth();
   }, []);
 
@@ -91,12 +111,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       // Attempt to clear cart on server before logging out
       authApi.logout();
-      
+
       // Then clear local storage
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      localStorage.removeItem('cart'); // Also clear cart from localStorage
-      
+
       // Update user state
       setUser(null);
     } catch (error) {
@@ -110,6 +129,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user,
         isAuthenticated: !!user,
         isLoading,
+        isAuthResolved, // Expose the new state
         login,
         register,
         logout,

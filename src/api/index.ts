@@ -3,8 +3,13 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:50001/api';
 
+
+// Add more detailed logging
+console.log('VITE_API_URL from env:', import.meta.env.VITE_API_URL);
+console.log('Final API_URL being used:', API_URL || 'http://localhost:50001/api');
+
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL || 'http://localhost:50001/api',
   headers: {
     'Content-Type': 'application/json',
   },
