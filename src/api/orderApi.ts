@@ -2,6 +2,12 @@
 import api from './index';
 import { Order, CartItem } from '../types';
 
+
+interface ShippingInfo {
+  shippingMethod: string;
+  shippingFee: number;
+}
+
 export const orderApi = {
   getAllOrders: async (): Promise<Order[]> => {
     const response = await api.get('/orders');
@@ -13,7 +19,12 @@ export const orderApi = {
     return response.data;
   },
 
-  createOrder: async (cartItems: CartItem[],userId: number, totalAmount: number): Promise<Order> => {
+  createOrder: async (
+    cartItems: CartItem[],
+    userId: number, 
+    totalAmount: number,
+    shippingInfo?: ShippingInfo
+  ): Promise<Order> => {
     const orderData = {
       userId: userId,
       total: totalAmount,
@@ -21,8 +32,14 @@ export const orderApi = {
         shoeId: item.shoe.id,
         quantity: item.quantity,
         price: item.shoe.price
-      }))
+      })),
+      // Include shipping information if provided
+      ...(shippingInfo && {
+        shippingMethod: shippingInfo.shippingMethod,
+        shippingFee: shippingInfo.shippingFee
+      })
     };
+    
     const response = await api.post('/orders', orderData);
     return response.data;
   },

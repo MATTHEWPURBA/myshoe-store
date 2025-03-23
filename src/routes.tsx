@@ -2,6 +2,7 @@
 import { createBrowserRouter, Navigate, RouteObject } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import MainLayout from './layouts/MainLayout';
+import DashboardLayout from './layouts/DashboardLayout';
 import LoadingSpinner from './components/common/LoadingSpinner';
 
 // Auth Pages
@@ -27,6 +28,17 @@ const HomePage = lazy(() => import('./pages/HomePage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'));
 
+// Admin Pages
+const ProductManagementPage = lazy(() => import('./pages/admin/ProductManagementPage'));
+const UserManagementPage = lazy(() => import('./pages/admin/UserManagementPage'));
+const SellerRequestsPage = lazy(() => import('./pages/admin/SellerRequestsPage'));
+const ExchangeRatesPage = lazy(() => import('./pages/admin/ExchangeRatesPage'));
+
+// User Pages
+const ProfilePage = lazy(() => import('./pages/user/ProfilePage'));
+const BecomeSellerPage = lazy(() => import('./pages/user/BecomeSellerPage'));
+
+
 // Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
@@ -44,6 +56,29 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 
   // Check if user is admin (you may want to add an isAdmin field to the User type)
   if (!user || !user.isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+  return <>{children}</>;
+};
+
+
+// Seller route wrapper
+const SellerRoute = ({ children }: { children: React.ReactNode }) => {
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+
+  if (!user || (user.role !== 'SELLER' && user.role !== 'SUPERADMIN')) {
+    return <Navigate to="/" replace />;
+  }
+  return <>{children}</>;
+};
+
+// SuperAdmin route wrapper
+const SuperAdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+
+  if (!user || user.role !== 'SUPERADMIN') {
     return <Navigate to="/" replace />;
   }
   return <>{children}</>;
@@ -78,6 +113,14 @@ const routes: RouteObject[] = [
           </Suspense>
         ),
       },
+      
+
+
+      
+
+
+
+
       {
         path: 'shoes',
         children: [
@@ -182,8 +225,84 @@ const routes: RouteObject[] = [
           </Suspense>
         ),
       },
+
+      // New User routes
+      {
+        path: 'profile',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          </Suspense>
+        ),
+      },
+      {
+        path: 'become-seller',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <ProtectedRoute>
+              <BecomeSellerPage />
+            </ProtectedRoute>
+          </Suspense>
+        ),
+      },
     ],
   },
+
+// Admin dashboard routes
+  {
+    path: '/admin',
+    element: <DashboardLayout />,
+    children: [
+      {
+        index: true,
+        element: <Navigate to="/admin/products" replace />,
+      },
+      {
+        path: 'products',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <SellerRoute>
+              <ProductManagementPage />
+            </SellerRoute>
+          </Suspense>
+        ),
+      },
+      {
+        path: 'users',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <SuperAdminRoute>
+              <UserManagementPage />
+            </SuperAdminRoute>
+          </Suspense>
+        ),
+      },
+      {
+        path: 'seller-requests',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <SuperAdminRoute>
+              <SellerRequestsPage />
+            </SuperAdminRoute>
+          </Suspense>
+        ),
+      },
+      {
+        path: 'currencies',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <SuperAdminRoute>
+              <ExchangeRatesPage />
+            </SuperAdminRoute>
+          </Suspense>
+        ),
+      },
+    ],
+  },
+
+
 ];
 
 export const router = createBrowserRouter(routes);

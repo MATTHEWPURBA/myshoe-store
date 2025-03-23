@@ -1,6 +1,6 @@
 // src/api/authApi.ts
 import api from './index';
-import { AuthUser, LoginCredentials, RegisterCredentials, User } from '../types';
+import { AuthUser, LoginCredentials, RegisterCredentials, User, ProfileUpdateData } from '../types';
 
 export const authApi = {
   login: async (credentials: LoginCredentials): Promise<AuthUser> => {
@@ -15,6 +15,11 @@ export const authApi = {
 
   getCurrentUser: async (): Promise<User> => {
     const response = await api.get('/auth/me');
+    return response.data;
+  },
+
+  updateProfile: async (data: ProfileUpdateData): Promise<User> => {
+    const response = await api.put('/auth/profile', data);
     return response.data;
   },
 

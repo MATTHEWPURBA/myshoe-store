@@ -84,12 +84,23 @@ const CheckoutPage: React.FC = () => {
     try {
       setIsSubmitting(true);
       
-      // Calculate the final total including shipping
-      const finalTotal = cart.total + (formData.shippingMethod === 'express' ? 15 : 0);
-      
-      // Create the order with user ID and total
-      const order = await orderApi.createOrder(cart.items, user.id, finalTotal);
-      
+    // Calculate shipping fee based on selected method
+    const shippingFee = formData.shippingMethod === 'express' ? 15 : 0;
+    
+        // Calculate the final total including shipping
+        const finalTotal = cart.total + shippingFee;
+    
+    // Create the order with shipping information
+    const order = await orderApi.createOrder(
+      cart.items,
+      user.id,
+      finalTotal,
+      {
+        shippingMethod: formData.shippingMethod,
+        shippingFee: shippingFee
+      }
+    );
+    
       // Clear the cart after successful order
       clearCart();
 

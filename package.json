@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
+    "start prod":"sudo npx serve -s dist",
     "build": "tsc -b && vite build --mode production",
     "build:dev": "tsc -b && vite build --mode development",
     "build:staging": "tsc -b && vite build --mode staging",

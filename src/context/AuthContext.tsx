@@ -1,6 +1,6 @@
 // src/context/AuthContext.tsx
 import React, { createContext, useEffect, useState, ReactNode } from 'react';
-import { User, AuthUser, LoginCredentials, RegisterCredentials } from '../types';
+import { User, AuthUser, LoginCredentials, RegisterCredentials, ProfileUpdateData } from '../types';
 import { authApi } from '../api/authApi';
 
 interface AuthContextType {
@@ -11,7 +11,9 @@ interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (userData: RegisterCredentials) => Promise<void>;
   logout: () => void;
-  error: string | null;
+    // Add this line to fix the error
+    updateProfile: (data: ProfileUpdateData) => Promise<User | void>;
+    error: string | null;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -22,6 +24,8 @@ export const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   register: async () => {},
   logout: () => {},
+  // Add this line to match the interface
+  updateProfile: async () => {},
   error: null,
 });
 
@@ -123,6 +127,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+
+   // New method to update user profile
+   const updateProfile = async (data: ProfileUpdateData) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const updatedUser = await authApi.updateProfile(data);
+      
+      // Update user in state and localStorage
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      return updatedUser;
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to update profile');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -133,6 +159,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         login,
         register,
         logout,
+        updateProfile,
         error,
       }}
     >

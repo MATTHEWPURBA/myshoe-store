@@ -36,6 +36,10 @@ export interface Order {
     paymentMethod?: string;
     paymentTime?: string;
     snapToken?: string;
+
+        // Add these fields
+        currency?: string;
+        exchangeRate?: number;
 }
 
 // Add this type for payment status responses
@@ -56,3 +60,11 @@ export interface PaymentResponse {
     snapToken?: string;
     error?: string;
 }
+
+
+// // Add this type for currency information
+// export interface Currency {
+//     code: string;
+//     name: string;
+//     rate: number;
+// }

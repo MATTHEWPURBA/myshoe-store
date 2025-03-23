@@ -35,6 +35,13 @@ const Navbar: React.FC = () => {
                   My Orders
                 </Link>
               )}
+              {/* // ADD THIS HERE: */}
+              {isAuthenticated && (user?.role === 'SELLER' || user?.role === 'SUPERADMIN') && (
+                <Link to="/admin/products" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                  Dashboard
+                </Link>
+              )}
+
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
@@ -60,6 +67,12 @@ const Navbar: React.FC = () => {
                     <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
                       Your Profile
                     </Link>
+                    {/* // ADD THIS HERE: */}
+                    {user?.role === 'CUSTOMER' && (
+                      <Link to="/become-seller" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                        Become a Seller
+                      </Link>
+                    )}
                     <button onClick={handleLogout} className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
                       Sign out
                     </button>

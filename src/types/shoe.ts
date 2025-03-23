@@ -11,6 +11,13 @@ export interface Shoe {
   description?: string;
   createdAt: string;
   updatedAt: string;
+    // Add these properties
+    createdBy?: number;
+    creator?: {
+      id: number;
+      name: string;
+      email?: string;
+    };
 }
 
 export type ShoeFilters = {
