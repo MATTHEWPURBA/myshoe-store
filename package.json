@@ -6,21 +6,25 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
-    "start prod":"sudo npx serve -s dist",
+    "start prod": "sudo npx serve -s dist",
     "build": "tsc -b && vite build --mode production",
     "build:dev": "tsc -b && vite build --mode development",
     "build:staging": "tsc -b && vite build --mode staging",
     "lint": "eslint .",
     "preview": "vite preview",
+    "build-and-serve": "sudo npm run build && sudo npx serve -s dist",
     "test": "vitest run"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.12",
     "@types/react-router-dom": "^5.3.3",
+    "@types/uuid": "^10.0.0",
     "axios": "^1.8.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.3.0"
+    "react-router-dom": "^7.3.0",
+    "socket.io-client": "^4.8.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

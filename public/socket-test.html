@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Socket.IO Test</title>
+  <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>Socket.IO Connection Test</h1>
+  <p>Status: <span id="status">Connecting...</span></p>
+  <p>Server URL: <input id="server-url" value="http://localhost:50001" style="width: 300px"></p>
+  <button id="connect-btn">Connect</button>
+  <p id="details"></p>
+  
+  <script>
+    const statusEl = document.getElementById('status');
+    const detailsEl = document.getElementById('details');
+    const urlInput = document.getElementById('server-url');
+    const connectBtn = document.getElementById('connect-btn');
+    let socket;
+    
+    function connect() {
+      if (socket) {
+        socket.disconnect();
+      }
+      
+      const url = urlInput.value;
+      statusEl.textContent = 'Connecting...';
+      detailsEl.textContent = '';
+      
+      socket = io(url, {
+        transports: ['websocket', 'polling'],
+        timeout: 10000
+      });
+      
+      socket.on('connect', () => {
+        statusEl.textContent = 'Connected!';
+        statusEl.style.color = 'green';
+        detailsEl.textContent = `Socket ID: ${socket.id}
+        Transport: ${socket.io.engine.transport.name}
+        Connected: ${socket.connected}`;
+      });
+      
+      socket.on('connect_error', (err) => {
+        statusEl.textContent = 'Connection failed';
+        statusEl.style.color = 'red';
+        detailsEl.textContent = `Error: ${err.message}`;
+        console.error('Connection error:', err);
+      });
+      
+      socket.on('disconnect', (reason) => {
+        statusEl.textContent = 'Disconnected';
+        statusEl.style.color = 'orange';
+        detailsEl.textContent += `\nDisconnect reason: ${reason}`;
+      });
+    }
+    
+    connectBtn.addEventListener('click', connect);
+    
+    // Initial connection
+    connect();
+  </script>
+</body>
+</html>

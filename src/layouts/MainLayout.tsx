@@ -4,6 +4,8 @@ import { Outlet } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
 import Footer from '../components/common/Footer';
 import { useToast } from '../hooks/useToast';
+import ChatWidget from '../components/chat/ChatWidget';
+
 
 const MainLayout: React.FC = () => {
   const { toasts, removeToast } = useToast();
@@ -49,6 +51,7 @@ const MainLayout: React.FC = () => {
       </main>
       
       <Footer />
+      <ChatWidget />
     </div>
   );
 };
